@@ -12,7 +12,7 @@ export default {
   // 内容区域宽度
   contentWidth: 'Fluid',
   // 头部固定
-  fixedHeader: false,
+  fixedHeader: true,
   // 固定侧边栏
   fixSiderbar: true,
   pwa: true,

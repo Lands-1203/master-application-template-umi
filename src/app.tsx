@@ -1,8 +1,3 @@
-import Footer from '@/components/Footer';
-import {
-  AvatarDropdown,
-  AvatarName
-} from '@/components/RightContent/AvatarDropdown';
 import { InitialStateType } from '@@/plugin-initialState/@@initialState';
 import { MasterOptions } from '@@/plugin-qiankun-master/types';
 import {
@@ -10,33 +5,38 @@ import {
   SettingDrawer,
   Settings as LayoutSettings
 } from '@ant-design/pro-components';
+import DynamicTheme from '@c/DynamicTheme';
+import Footer from '@c/Footer';
+import { AvatarDropdown, AvatarName } from '@c/RightContent/AvatarDropdown';
+import { dynamicNavTheme } from '@u/index';
 import type { RunTimeLayoutConfig } from '@umijs/max';
 import { useModel } from '@umijs/max';
-import { Switch } from 'antd';
-import EventEmitter from 'eventemitter3';
 import { cloneDeep } from 'lodash';
 import defaultSettings from '../config/defaultSettings';
 import initMenuData from './initMenuData.mock';
 import UnAccessible from './pages/exception/404';
 import { errorConfig } from './requestErrorConfig';
+import { getCacheNavTheme, navThemeKey } from './storageManagement';
 // const loginPath = '/user/login';
-
-(window as any).APPEvent = new EventEmitter<string>();
-
 /**
  * @see  https://umijs.org/zh-CN/plugins/plugin-initial-state
  * */
+
 export async function getInitialState(): Promise<{
   settings?: Partial<LayoutSettings>;
   currentUser?: API.currentUserProps;
   systemInfo?: API.systemInfoProps;
   loading?: boolean;
 }> {
+  const navTheme = getCacheNavTheme();
   return {
     currentUser: {
       name: 'lantao',
     },
-    settings: { ...defaultSettings } as Partial<LayoutSettings>,
+    settings: {
+      ...defaultSettings,
+      navTheme: navTheme === 'auto' ? dynamicNavTheme() : navTheme,
+    } as Partial<LayoutSettings>,
   };
 }
 
@@ -46,25 +46,16 @@ export const layout: RunTimeLayoutConfig = ({
   setInitialState,
 }) => {
   return {
-    // loading: true,
     waterMarkProps: {
       content: '水印',
     },
     actionsRender: () => [
-      <Switch
-        key={''}
-        unCheckedChildren="🌞"
-        checkedChildren="🌜"
-        defaultChecked={initialState?.settings?.navTheme === 'realDark'}
-        onChange={(v) => {
-          setInitialState({
-            ...initialState,
-            settings: {
-              ...initialState?.settings,
-              navTheme: v ? 'realDark' : 'light',
-            },
-          });
-        }}
+      <DynamicTheme
+        key="navTheme"
+        initialState={initialState}
+        setInitialState={setInitialState}
+        dynamicNavTheme={dynamicNavTheme}
+        localStorageKey={navThemeKey}
       />,
     ],
     avatarProps: {
@@ -82,11 +73,19 @@ export const layout: RunTimeLayoutConfig = ({
     },
     footerRender: () => <Footer />,
     onPageChange: () => {
-      // const { location } = history;
-      // 如果没有登录，重定向到 login
-      // if (!initialState?.currentUser && location.pathname !== loginPath) {
-      //   history.push(loginPath);
-      // }
+      const navTheme = dynamicNavTheme();
+      if (
+        localStorage.getItem(navThemeKey) === 'auto' &&
+        navTheme !== initialState?.settings?.navTheme
+      ) {
+        setInitialState({
+          ...initialState,
+          settings: {
+            ...initialState?.settings,
+            navTheme: navTheme,
+          },
+        });
+      }
     },
     unAccessible: <UnAccessible />,
     childrenRender: (children) => {

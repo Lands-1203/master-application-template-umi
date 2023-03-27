@@ -1,0 +1,54 @@
+{
+  "[typescriptreact]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "[jsonc]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "[javascriptreact]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "eslint.enable": true,
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
+  "git.enableSmartCommit": true,
+  "javascript.updateImportsOnFileMove.enabled": "always",
+  "editor.fontLigatures": null,
+  "editor.suggest.snippetsPreventQuickSuggestions": false,
+  "typescript.updateImportsOnFileMove.enabled": "always",
+
+  "git.autofetch": true,
+  "editor.codeActionsOnSave": {
+    //自动格式化tsx顶部import 排序和自动删除
+    "source.organizeImports": true,
+    // 每次保存的时候将代码按eslint格式进行修复,vscode es6语法检测配置
+    "source.fixAll.eslint": true
+  },
+  "editor.suggestSelection": "first",
+  "[less]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "[typescript]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+
+  "editor.accessibilitySupport": "on",
+  "[javascript]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+
+  "editor.formatOnType": false,
+  "editor.formatOnPaste": false,
+  "editor.inlineSuggest.enabled": true,
+  "[json]": {
+    "editor.defaultFormatter": "vscode.json-language-features"
+  },
+  "eslint.rules.customizations": [],
+  "eslint.validate": [
+    "javascript",
+    "typescript",
+    "javascriptreact",
+    "typescriptreact"
+  ],
+  "html.format.contentUnformatted": "",
+  "editor.codeLensFontFamily": "MesLoLGL Nerd Font"
+}

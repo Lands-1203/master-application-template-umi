@@ -1,5 +1,5 @@
 // import { useNavigate } from '@umijs/max';
-import { Button, Result } from 'antd';
+import { Result } from 'antd';
 
 export default () => {
   // const navigate = useNavigate();
@@ -10,8 +10,8 @@ export default () => {
       style={{
         background: 'none',
       }}
-      subTitle="Sorry, the server is reporting an error."
-      extra={<Button type="primary">Back Home</Button>}
+      subTitle="对不起，服务器出错了"
+      // extra={<Button type="primary">Back Home</Button>}
     />
   );
 };

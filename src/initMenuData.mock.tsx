@@ -7,23 +7,27 @@ export default [
     icon: <LaptopOutlined />,
     path: '/businessPlatform',
     children: [
-      { name: '欢迎页', icon: <LaptopOutlined />, path: '/businessPlatform' },
+      {
+        name: '欢迎页3',
+        icon: <LaptopOutlined />,
+        path: '/businessPlatform/Welcome',
+      },
     ],
   },
   {
     name: '主系统',
     icon: <LaptopOutlined />,
-    path: '/',
+    path: '/system',
     children: [
       {
-        name: '欢迎页',
+        name: '欢迎页1',
         icon: <SmileOutlined />,
-        path: '/Welcome',
+        path: 'Welcome',
       },
       {
-        name: '欢迎页',
+        name: '欢迎页2',
         icon: <SmileOutlined />,
-        path: '/Welcome1',
+        path: 'Welcome1',
       },
     ],
   },

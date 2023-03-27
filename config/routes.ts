@@ -1,6 +1,4 @@
-﻿import { Button, Result } from 'antd';
-
-/**
+﻿/**
  * @name umi 的路由配置
  * @description 只支持 path,component,routes,redirect,wrappers,name,icon 的配置
  * @param path  path 只支持两种占位符配置，第一种是动态参数 :id 的形式，第二种是 * 通配符，通配符只能出现路由字符串的最后。
@@ -18,38 +16,31 @@ export default [
     redirect: '/Welcome',
   },
   {
+    path: '/system',
+    redirect: '/system/Welcome',
+  },
+  {
+    path: '/system',
+    routes: [
+      {
+        path: 'welcome',
+        component: './Welcome',
+      },
+    ],
+  },
+
+  {
+    path: '/businessPlatform/*',
+    component: './BusinessPlatform',
+  },
+  {
     path: '/welcome',
     component: './Welcome',
   },
   {
-    path: '/welcome1',
-    component: './Welcome',
-  },
-  {
-    path: '/businessPlatform',
-    microApp: 'businessPlatform',
-    microAppProps: {
-      autoSetLoading: true,
-      autoCaptureError: true,
-      errorBoundary: (error: any) => {
-        console.dir('<div>1111231564我是错误</div>', error);
-        return (
-          <Result
-            status="500"
-            title="500"
-            style={{
-              background: 'none',
-            }}
-            subTitle="Sorry, the server is reporting an error."
-            extra={<Button type="primary">Back Home</Button>}
-          />
-        );
-      },
-    },
-  },
-  {
-    path: '/businessPlatform/*',
-    microApp: 'businessPlatform',
+    path: '/user/login',
+    layout: false,
+    component: './User/Login',
   },
   {
     path: '*',
