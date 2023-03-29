@@ -1,0 +1,19 @@
+.global-layout-layouTabs {
+  width: 100%;
+  position: sticky;
+  // top菜单的高度
+  top: 55px;
+  left: 0;
+  z-index: 1;
+}
+.content {
+  :global {
+    .ant-pro-page-container-children-content,
+    .ant-page-header {
+      padding: 0 !important;
+    }
+    .qiankun-micro-app-wrapper {
+      min-height: 650px;
+    }
+  }
+}

@@ -1,10 +1,13 @@
 // https://umijs.org/config/
 import { defineConfig } from '@umijs/max';
+import { theme } from 'antd';
 import defaultSettings from './defaultSettings';
 import openAPI from './openAPI.config';
 import proxy from './proxy';
 import routes from './routes';
 const { REACT_APP_ENV = 'dev' } = process.env;
+const { defaultAlgorithm, defaultSeed } = theme;
+const mapToken = defaultAlgorithm(defaultSeed);
 
 export default defineConfig({
   alias: {
@@ -139,4 +142,12 @@ export default defineConfig({
     master: {},
   },
   npmClient: 'pnpm',
+  clickToComponent: {
+    editor: 'vscode',
+  },
+  lessLoader: {
+    lessOptions: {
+      modifyVars: mapToken,
+    },
+  },
 });

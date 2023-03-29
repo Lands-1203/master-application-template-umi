@@ -20,7 +20,7 @@ export default {
   // 侧边菜单类型
   // siderMenuType: 'group',
   // 侧边菜单为空时不显示 侧边栏
-  // suppressSiderWhenMenuEmpty: false,
+  suppressSiderWhenMenuEmpty: false,
   // 色弱模式
   colorWeak: false,
   // 不显示头部

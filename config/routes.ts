@@ -44,6 +44,7 @@ export default [
   },
   {
     path: '*',
+    layout: false,
     component: './exception/404',
   },
 ];

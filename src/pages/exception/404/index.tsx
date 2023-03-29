@@ -1,6 +1,5 @@
 import { useNavigate } from '@umijs/max';
 import { Button, Result } from 'antd';
-
 export default () => {
   const navigate = useNavigate();
   return (

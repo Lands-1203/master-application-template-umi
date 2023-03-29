@@ -10,7 +10,7 @@ export default [
       {
         name: '欢迎页3',
         icon: <LaptopOutlined />,
-        path: '/businessPlatform/Welcome',
+        path: '/businessPlatform/welcome',
       },
     ],
   },
@@ -22,12 +22,12 @@ export default [
       {
         name: '欢迎页1',
         icon: <SmileOutlined />,
-        path: 'Welcome',
+        path: 'welcome',
       },
       {
         name: '欢迎页2',
         icon: <SmileOutlined />,
-        path: 'Welcome1',
+        path: 'welcome1',
       },
     ],
   },

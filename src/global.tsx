@@ -1,9 +1,14 @@
-import { Button, message, notification } from 'antd';
+import { Button, message, notification, theme } from 'antd';
 import defaultSettings from '../config/defaultSettings';
 import { registerGlobalEvent } from './event';
-
+import './global.less';
 // 注册装在全局Event
 registerGlobalEvent();
+
+document.body.style.setProperty(
+  '--primary-color',
+  theme.defaultAlgorithm(theme.defaultSeed).colorPrimary,
+);
 
 const { pwa } = defaultSettings;
 const isHttps = document.location.protocol === 'https:';

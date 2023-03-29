@@ -9,30 +9,34 @@ import DynamicTheme from '@c/DynamicTheme';
 import Footer from '@c/Footer';
 import { AvatarDropdown, AvatarName } from '@c/RightContent/AvatarDropdown';
 import { dynamicNavTheme } from '@u/index';
-import type { RunTimeLayoutConfig } from '@umijs/max';
-import { useModel } from '@umijs/max';
+import { RunTimeLayoutConfig, useModel } from '@umijs/max';
+import { Route } from '@umijs/route-utils/dist/types';
 import { cloneDeep } from 'lodash';
 import defaultSettings from '../config/defaultSettings';
-import initMenuData from './initMenuData.mock';
+import { default as initMenuData } from './initMenuData.mock';
 import UnAccessible from './pages/exception/404';
 import { errorConfig } from './requestErrorConfig';
 import { getCacheNavTheme, navThemeKey } from './storageManagement';
+
 // const loginPath = '/user/login';
 /**
  * @see  https://umijs.org/zh-CN/plugins/plugin-initial-state
- * */
-
+ *
+ */
 export async function getInitialState(): Promise<{
   settings?: Partial<LayoutSettings>;
   currentUser?: API.currentUserProps;
   systemInfo?: API.systemInfoProps;
   loading?: boolean;
+  initMenuData?: Record<string, any>;
+  headerRenderPropsData?: Route[];
 }> {
   const navTheme = getCacheNavTheme();
   return {
     currentUser: {
       name: 'lantao',
     },
+    initMenuData,
     settings: {
       ...defaultSettings,
       navTheme: navTheme === 'auto' ? dynamicNavTheme() : navTheme,
@@ -64,6 +68,15 @@ export const layout: RunTimeLayoutConfig = ({
       render: (_, avatarChildren) => {
         return <AvatarDropdown>{avatarChildren}</AvatarDropdown>;
       },
+    },
+
+    headerRender: (props, defaultDom) => {
+      setInitialState({
+        ...initialState,
+        headerRenderPropsData: (props as any)?.route?.routes,
+      });
+      console.log(props, 'lands');
+      return defaultDom;
     },
     menu: {
       params: { initMenuData },
