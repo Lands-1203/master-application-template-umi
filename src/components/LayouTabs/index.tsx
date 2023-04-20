@@ -1,14 +1,12 @@
+/* eslint-disable @typescript-eslint/no-use-before-define */
 import { GLOBAL_EVENT } from '@/event';
-import {
-  AppstoreOutlined,
-  CloseOutlined,
-  RightOutlined
-} from '@ant-design/icons';
-import { useLocation, useNavigate } from '@umijs/max';
+import { adjustColor } from '@/utils';
+import { AppstoreOutlined, CloseOutlined, RightOutlined } from '@ant-design/icons';
+import { history, useLocation, useModel } from '@umijs/max';
 import type { MenuDataItem } from '@umijs/route-utils';
 import { getMatchMenu, transformRoute } from '@umijs/route-utils';
 import { Route } from '@umijs/route-utils/dist/types';
-import { Dropdown } from 'antd';
+import { Dropdown, theme } from 'antd';
 import { ItemType } from 'antd/es/menu/hooks/useItems';
 import cs from 'classnames';
 import { ComponentProps, FC, useEffect, useMemo, useState } from 'react';
@@ -29,19 +27,15 @@ type List = MenuDataItem & {
 };
 
 export interface TableLayoutProps
-  extends React.DetailedHTMLProps<
-    React.HTMLAttributes<HTMLDivElement>,
-    HTMLDivElement
-  > {
+  extends React.DetailedHTMLProps<React.HTMLAttributes<HTMLDivElement>, HTMLDivElement> {
   menuData: MenuDataItem;
 }
-const TabsLayout: FC<TableLayoutProps> = ({
-  menuData: initMenuRawData,
-  ...divProps
-}) => {
+const TabsLayout: FC<TableLayoutProps> = ({ menuData: initMenuRawData, ...divProps }) => {
+  const { useToken } = theme;
+  const { token } = useToken();
+  const { initialState } = useModel('@@initialState');
+  const navTheme: API.NavThemeProps | undefined = initialState?.settings?.navTheme;
   let location = useLocation();
-
-  let navigate = useNavigate();
   // 记录列表
   const [list, setList] = useState<List[]>([]);
   // 当前的key
@@ -64,24 +58,21 @@ const TabsLayout: FC<TableLayoutProps> = ({
     path = path.substring(path.length - 1) === '/' ? path : `${path}/`;
     if (
       !currentPathConfig ||
-      (currentPathConfig.children && currentPathConfig.children?.length > 0)
+      (currentPathConfig.children && currentPathConfig.children?.length > 0) ||
+      !currentPathConfig.name
     ) {
       return;
     }
 
-    if (!currentPathConfig.name) {
-      return;
-    }
     setList((draft) => {
       if (
         !draft.some((v) => {
-          return [`${v.path}/`.toLowerCase(), v.path.toLowerCase()].includes(
-            path.toLowerCase(),
-          );
+          return stringEqual(v.path, path);
         })
       ) {
         return draft.concat({
           ...currentPathConfig,
+          path: `${currentPathConfig.path}/`,
         } as any);
       }
 
@@ -92,32 +83,23 @@ const TabsLayout: FC<TableLayoutProps> = ({
   }, [currentPathConfig, location.pathname]);
 
   useEffect(() => {
-    if (!list.length || !activeKey) {
-      return;
-    }
+    document.body.style.setProperty(
+      '--layout-tabs-active-bg-color',
+      adjustColor(token.colorPrimary || '"#1890ff"', 0.98, 1),
+    );
+    document.body.style.setProperty(
+      '--layout-tabs-active-bg-color-dark',
+      adjustColor(token.colorPrimary || '"#1890ff"', 0.05, 1),
+    );
+  }, [token.colorPrimary]);
 
-    const findIndex = list.findIndex((v) => v.path === activeKey);
-
-    if (findIndex > -1) {
-      document
-        .querySelectorAll('.global-tabs-layout-item')
-        [findIndex]?.scrollIntoView();
-    }
-  }, [list, activeKey]);
-
-  const handleOnDragEnd: ComponentProps<typeof DragDropContext>['onDragEnd'] = (
-    result: any,
-  ) => {
+  const handleOnDragEnd: ComponentProps<typeof DragDropContext>['onDragEnd'] = (result: any) => {
     // dropped outside the list
     if (!result.destination) {
       return;
     }
 
-    const newList = reorder(
-      list,
-      result.source.index,
-      result.destination.index,
-    );
+    const newList = reorder(list, result.source.index, result.destination.index);
 
     setList(newList);
   };
@@ -130,29 +112,6 @@ const TabsLayout: FC<TableLayoutProps> = ({
     GLOBAL_EVENT.once('clearGlobalTabBarList', () => {
       setList([]);
     });
-    // 初始化菜单数据
-    const $list = document.querySelector('.global-tabs-layout-list') as
-      | HTMLDivElement
-      | undefined;
-
-    function scrollHorizontally(event: any) {
-      const e = window.event || event;
-      const delta = Math.max(-1, Math.min(1, e.wheelDelta || -e.detail));
-      if ($list) {
-        $list.scrollLeft -= delta * 50;
-      }
-      e.preventDefault();
-    }
-
-    if ($list) {
-      $list.addEventListener('mousewheel', scrollHorizontally, false);
-      $list.addEventListener('DOMMouseScroll', scrollHorizontally, false);
-    }
-
-    return () => {
-      $list?.addEventListener('mousewheel', scrollHorizontally, false);
-      $list?.addEventListener('DOMMouseScroll', scrollHorizontally, false);
-    };
   }, []);
 
   const closeSelf = (targetKey: string | undefined) => {
@@ -172,10 +131,13 @@ const TabsLayout: FC<TableLayoutProps> = ({
             : draft[0].path;
 
         setActiveKey(offsetActiveKey);
-        navigate(offsetActiveKey);
+        history.push(offsetActiveKey);
       }
+      const newList = draft.filter((_, i) => {
+        return i !== findIndex;
+      });
 
-      return draft.filter((_, i) => i !== findIndex);
+      return newList;
     });
   };
 
@@ -188,10 +150,8 @@ const TabsLayout: FC<TableLayoutProps> = ({
         onClick: () => {
           setList((draft) => {
             const newList = draft.filter((v) => v.path === targetKey);
-
             setActiveKey(newList[0].path);
-            navigate(newList[0].path);
-
+            history.push(newList[0].path);
             return newList;
           });
         },
@@ -203,10 +163,12 @@ const TabsLayout: FC<TableLayoutProps> = ({
         onClick: () => {
           setList((draft) => {
             const findIndex = draft.findIndex((v) => v.path === targetKey);
-            if (findIndex <= -1) {
-              return draft;
+            const newList = draft.filter((_, i) => i <= findIndex);
+            if (newList.findIndex((v) => v.path === activeKey) === -1) {
+              setActiveKey(newList[newList.length - 1].path);
+              history.push(newList[newList.length - 1].path);
             }
-            return draft.filter((_, i) => i <= findIndex);
+            return newList;
           });
         },
       },
@@ -217,10 +179,12 @@ const TabsLayout: FC<TableLayoutProps> = ({
         onClick: () => {
           setList((draft) => {
             const findIndex = draft.findIndex((v) => v.path === targetKey);
-            if (findIndex <= -1) {
-              return draft;
+            const newList = draft.filter((_, i) => i >= findIndex);
+            if (newList.findIndex((v) => v.path === activeKey) === -1) {
+              setActiveKey(newList[0].path);
+              history.push(newList[0].path);
             }
-            return draft.filter((_, i) => i >= findIndex);
+            return newList;
           });
         },
       },
@@ -237,12 +201,13 @@ const TabsLayout: FC<TableLayoutProps> = ({
   };
 
   return show ? (
-    <div
-      className={`global-tabs-layout-container-div ${divProps.className || ''}`}
-      {...divProps}
-    >
+    <div className={`global-tabs-layout-container-div ${divProps.className || ''}`} {...divProps}>
       <DragDropContext onDragEnd={handleOnDragEnd}>
-        <div className="global-tabs-layout">
+        <div
+          className={cs('global-tabs-layout', {
+            'global-tabs-layout-realDark': navTheme === 'realDark',
+          })}
+        >
           <Droppable direction="horizontal" droppableId="droppable">
             {(wrapProvided: any, wrapSnapshot: any) => {
               return (
@@ -255,11 +220,7 @@ const TabsLayout: FC<TableLayoutProps> = ({
                 >
                   {list.map((item, index) => {
                     return (
-                      <Draggable
-                        key={item.path}
-                        draggableId={item.path}
-                        index={index}
-                      >
+                      <Draggable key={item.path} draggableId={item.path} index={index}>
                         {(provided: any) => (
                           <Dropdown
                             menu={{ items: getDropMenu(item.path) }}
@@ -270,18 +231,20 @@ const TabsLayout: FC<TableLayoutProps> = ({
                               {...provided.draggableProps}
                               {...provided.dragHandleProps}
                               className={cs('global-tabs-layout-item', {
-                                active: item.path === activeKey,
+                                active: stringEqual(item.path, activeKey),
+                                'real-dark': navTheme === 'realDark',
                               })}
                               onClick={() => {
-                                if (item.path === activeKey) {
+                                if (stringEqual(item.path, activeKey)) {
                                   return;
                                 }
 
                                 setActiveKey(item.path);
-                                navigate(item.path);
+                                history.push(item.path);
                               }}
                             >
                               <div className="global-tabs-layout-item-label">
+                                {item.icon}&nbsp;
                                 {item.name}
                               </div>
 
@@ -310,10 +273,7 @@ const TabsLayout: FC<TableLayoutProps> = ({
           </Droppable>
 
           <div className="global-tabs-layout-extra">
-            <Dropdown
-              menu={{ items: getDropMenu(activeKey) }}
-              trigger={['hover']}
-            >
+            <Dropdown menu={{ items: getDropMenu(activeKey) }} trigger={['hover']}>
               <AppstoreOutlined />
             </Dropdown>
           </div>
@@ -326,3 +286,22 @@ const TabsLayout: FC<TableLayoutProps> = ({
 };
 
 export default TabsLayout;
+
+/**
+ * 对比路由是否相同 不区分大小写和尾部斜杠
+ * @param string1
+ * @param string2
+ * @returns
+ */
+function stringEqual(string1: string, string2?: string): boolean {
+  if (!string1 || !string2) return false;
+  if (string1 === string2) return true;
+  let shortStr = string1;
+  let longtStr = string2;
+  if (string1.length > string2.length) {
+    shortStr = string2;
+    longtStr = string1;
+  }
+  const lowerCaseStrs = [shortStr.toLocaleLowerCase(), `${shortStr}/`.toLocaleLowerCase()];
+  return lowerCaseStrs.includes(longtStr.toLocaleLowerCase());
+}
